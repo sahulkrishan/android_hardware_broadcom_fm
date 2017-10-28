@@ -29,6 +29,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include "btsnoop.h"
 
 
 /******************************************************************************
@@ -91,7 +92,7 @@ void utils_cleanup ();
 ** Returns         None
 **
 *******************************************************************************/
-static void utils_queue_init (BUFFER_Q *p_q);
+__attribute__((unused)) static void utils_queue_init (BUFFER_Q *p_q);
 
 /*******************************************************************************
 **
@@ -215,7 +216,7 @@ uint8_t* utils_alloc (int size);
 **
 ** Returns         None+**
 *******************************************************************************/
-void utils_release(uint8_t* ptr);
+void utils_release(HC_BT_HDR* ptr);
 
 /*******************************************************************************
 **

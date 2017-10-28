@@ -468,7 +468,7 @@ void btsnoop_acl_data(uint8_t *p, uint8_t is_rcvd)
 
 #define EXT_PARSER_PORT 4330
 
-static pthread_t thread_id;
+__attribute__((unused)) static pthread_t thread_id;
 static int s_listen = -1;
 static int ext_parser_fd = -1;
 
@@ -480,7 +480,6 @@ static int ext_parser_accept(int port)
     struct sockaddr_in  cliaddr, servaddr;
     int s, srvlen;
     int n = 1;
-    int size_n;
     int result = 0;
 
     ALOGD("waiting for connection on port %d", port);
@@ -533,7 +532,7 @@ static int ext_parser_accept(int port)
     return s;
 }
 
-static int send_ext_parser(char *p, int len)
+__attribute__((unused)) static int send_ext_parser(char *p, int len)
 {
     int n;
 
@@ -567,13 +566,13 @@ static void ext_parser_detached(void)
     s_listen = -1;
 }
 
-static void interruptFn (int sig)
+static void interruptFn (__attribute__((unused)) int sig)
 {
     ALOGD("interruptFn");
     pthread_exit(0);
 }
 
-static void ext_parser_thread(void* param)
+__attribute__((unused)) static void ext_parser_thread(__attribute__((unused)) void* param)
 {
     int fd;
     int sig = SIGUSR2;

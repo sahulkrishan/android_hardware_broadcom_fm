@@ -61,6 +61,7 @@
 #include <cutils/misc.h>
 #endif
 
+#undef  LOG_TAG
 #define LOG_TAG "brcm-uim"
 
 #define UIM_DEBUG 1
@@ -138,7 +139,6 @@ btuim_lpm_param_t lpm_uim_param =
 int pass_vendor_params()
 {
     int fd_vendor_params = 0;
-    int len;
 
     fd_vendor_params = open(LDISC_VENDOR_PARAMS, O_WRONLY);
     if (fd_vendor_params > 0)
@@ -609,10 +609,10 @@ static inline void err_cleanup(int st_fd)
 
 #ifdef ANDROID   /* library for android to do insmod/rmmod  */
 
-/*****************************************************************************/
-/* Function to insert the kernel module into the system
-  ****************************************************************************/
-static int insmod(const char *filename, const char *args)
+/***************************************************************************
+* Function to insert the kernel module into the system
+****************************************************************************/
+__attribute__((unused)) static int insmod(const char *filename, const char *args)
 {
     void *module;
     unsigned int size;
@@ -635,10 +635,10 @@ static int insmod(const char *filename, const char *args)
 }
 
 
-/*****************************************************************************/
-/* Function to remove the kernel module from the system
-****************************************************************************/
-static int rmmod(const char *modname)
+/*****************************************************************************
+ * Function to remove the kernel module from the system
+*****************************************************************************/
+__attribute__((unused)) static int rmmod(const char *modname)
 {
     int ret = -1;
     int maxtry = MAX_TRY;
@@ -664,13 +664,13 @@ static int rmmod(const char *modname)
 
 
 
-/*****************************************************************************/
-/* Function to read the HCI event from the given file descriptor
+/****************************************************************************
+ * Function to read the HCI event from the given file descriptor
  *
  * This will parse the response received and returns error
  * if the required response is not received
- */
-int read_hci_event(int fd, unsigned char *buf, int size)
+ ****************************************************************************/
+int read_hci_event(int fd, char *buf, int size)
 {
     int remain, rd;
     int count = 0;
@@ -738,7 +738,7 @@ static int read_command_complete(int fd, unsigned short opcode)
     UIM_START_FUNC();
 
     UIM_VER(" Command complete started");
-    if (read_hci_event(fd, (unsigned char *)&resp, sizeof(resp)) < 0) {
+    if (read_hci_event(fd, (char *)&resp, sizeof(resp)) < 0) {
         UIM_ERR(" Invalid response");
         return -1;
     }
@@ -797,8 +797,7 @@ BRCM_encode_baud_rate(uint baud_rate, unsigned char *encoded_baud)
     encoded_baud[0] = (unsigned char)(baud_rate & 0xFF);
 }
 
-void
-BRCM_encode_bd_address( unsigned char  *bd_addrr)
+void BRCM_encode_bd_address( unsigned char  *bd_addrr)
 {
     if(bd_addrr == NULL) {
         fprintf(stderr, "BD addr not supported!");
@@ -858,8 +857,9 @@ validate_baudrate(int baud_rate, int *value)
 *****************************************************************************/
 static int proc_set_lpm_param()
 {
-    const char hci_writesleepmode_cmd[] = {0x01, 0x27, 0xFC, 0x0C, 0x00,0x00,0x001,\
-                                          0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
+    char hci_writesleepmode_cmd[] = {0x01, 0x27, 0xFC, 0x0C, 0x00, 0x00, 0x01,\
+                                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
+                                     0x00, 0x00};
     char cmd[100];
     UIM_DBG("lpmenable %d",lpmenable);
     char *temp = hci_writesleepmode_cmd;
@@ -867,14 +867,14 @@ static int proc_set_lpm_param()
     if(lpmenable) {
         memcpy((temp+4), &lpm_uim_param, LPM_CMD_PARAM_SIZE);
         UIM_DBG("%s lpm is enabled", __func__);
-        }
-    else
+    } else {
         memset((temp+4), 0, LPM_CMD_PARAM_SIZE);
+    }
 
     sprintf(cmd, "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x",
               temp[0], temp[1], temp[2],temp[3], temp[4], temp[5],
               temp[6], temp[7], temp[8],temp[9], temp[10], temp[11],
-              temp[12], temp[13], temp[14],temp[15]);
+              temp[12], temp[13], temp[14], temp[15]);
     strcat(hw_cfg_string , cmd);
     return 0;
 }
@@ -1061,8 +1061,8 @@ static uint8_t hw_config_findpatch(char *p_chip_id_str)
 
 static uint8_t proc_read_local_name(char* p_chip_id_str)
 {
-    unsigned char hci_read_localname[] = { 0x01, 0x14, 0x0C, 0x00 };
-    unsigned char buff[READ_LOCALNAME_RESP_BUFF_SIZE];
+    char hci_read_localname[] = { 0x01, 0x14, 0x0C, 0x00 };
+    char buff[READ_LOCALNAME_RESP_BUFF_SIZE];
     char *p_name, *p_tmp;
     int len, i;
 
@@ -1400,8 +1400,6 @@ void read_default_bdaddr(bdaddr_t *local_addr)
 int main(void)
 {
     int st_fd, err;
-    struct stat file_stat;
-    char kmodule_path[MAX_KMODULE_PATH_SIZE] = {0};
     struct pollfd p;
     unsigned char install;
 
@@ -1409,14 +1407,14 @@ int main(void)
     err = 0;
 
     /* Read configuration parameters for hardware config */
-    if (vnd_load_conf(VENDOR_LIB_CONF_FILE, &vendor_conf_table))
+    if (vnd_load_conf(VENDOR_LIB_CONF_FILE, &vendor_conf_table[0]))
     {
         return UIM_FAIL;
     }
 
 #if V4L2_SNOOP_ENABLE
     /* Read configuration parameters for hci snoop */
-    if (vnd_load_conf(STACK_CONF_FILE, &stack_conf_table))
+    if (vnd_load_conf(STACK_CONF_FILE, &stack_conf_table[0]))
     {
         return UIM_FAIL;
     }

@@ -155,11 +155,11 @@ uint8_t* utils_alloc (int size)
 ** Returns         None
 **
 *******************************************************************************/
-void utils_release(uint8_t* ptr)
+void utils_release(HC_BT_HDR* ptr)
 {
-    uint8_t* p;
+    HC_BT_HDR* p;
 
-    p = (uint8_t*)ptr - BT_HC_BUFFER_HDR_SIZE;
+    p = ptr - BT_HC_BUFFER_HDR_SIZE;
     free(p);
 }
 
